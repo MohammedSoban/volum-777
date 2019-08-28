@@ -31,7 +31,7 @@ export default function ButtonAppBar() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" className={classes.title}>
-            Volume
+            Volume-777
           </Typography>
           <Button color="inherit" onClick={()=>setCreateCatOpen(true)}>Add Category</Button>
         </Toolbar>
