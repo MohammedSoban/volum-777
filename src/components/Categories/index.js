@@ -3,6 +3,7 @@ import { db } from "./../../firebase";
 import Category from "./Category";
 import { connect } from "react-redux";
 import { categoryAction } from "../../store/actions";
+import ReactLoading from 'react-loading';
 
 class Categories extends Component {
   state = {
@@ -14,38 +15,15 @@ class Categories extends Component {
     this.props.getCategories();
   }
 
-  // getDataFromFirebase = () => {
-  //     let categoriesRef = db.collection('categories');
-  //     let categories = []
-  //     let allCities = categoriesRef.get()
-  //         .then(snapshot => {
-  //             snapshot.forEach(doc => {
-  //                 console.log(doc.id, '=>', doc.data());
-  //                 categories.push({
-  //                     cId: doc.id,
-  //                     name: doc.data().name
-  //                 })
-  //             });
-  //             this.setState({
-  //                 categories
-  //             })
-  //         })
-  //         .catch(err => {
-  //             console.log('Error getting documents', err);
-  //         });
-
-  //         let unsub = db.collection('categories').onSnapshot((a) => {
-  //             // this.getDataFromFirebase()
-  //         });
-
-  // }
-
   render() {
-    const { categories } = this.props;
+    const { categories , getCategoriesLoader} = this.props;
     return (
       <div>
+        {
+          getCategoriesLoader ? <div style={{margin: '0 auto', width: '20%', position: "absolute", top: '25%', left: '25%', right: '25%' }}><ReactLoading type={"spokes"} color={"#0097A7"} height={'20%'} width={'100%'} /></div> : ''
+        }
         {categories && categories.map((category, i) => {
-          return <Category category={category} key={i} />;
+          return <Category category={category} key={i} getCategories={this.props.getCategories}/>;
         })}
       </div>
     );
@@ -63,7 +41,7 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    getCategories: () => dispatch(categoryAction.getCategories())
+    getCategories: (payload) => dispatch(categoryAction.getCategories(payload))
   };
 };
 

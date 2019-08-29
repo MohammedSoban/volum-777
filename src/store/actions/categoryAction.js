@@ -33,10 +33,10 @@ export class categoryAction {
 
   // get all Category
 
-  static getCategories() {
+  static getCategories(payload) {
     return {
       type: GET_CATEGORIES,
-      payload: null
+      payload
     };
   }
 

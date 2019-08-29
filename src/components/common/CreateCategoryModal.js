@@ -7,20 +7,14 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import { db } from "./../../firebase";
-import { connect } from 'react-redux'
-import { categoryAction } from '../../store/actions/categoryAction'
+import { connect } from "react-redux";
+import { categoryAction } from "../../store/actions/categoryAction";
+import ReactLoading from 'react-loading';
 
 class CreateCategoryModal extends Component {
   state = {
-    name: "",
+    name: ""
   };
-
-
-//   componentWillUpdate(prevProps) {
-//     if(prevProps.createdCategory && !prevProps.createCompanyLoader && this.props.createCompanyLoader){
-//         this.props.createdCategory(this.state.name)
-//     }
-//   }
 
   handleInput = event => {
     this.setState({
@@ -29,12 +23,29 @@ class CreateCategoryModal extends Component {
   };
 
   createCategory = () => {
-    this.props.createCategory(this.state.name)
+    this.props.createCategory({ name: this.state.name });
   };
 
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevProps.createCategoryLoader &&
+      !this.props.createCategoryLoader &&
+      this.props.createdCategory
+    ) {
+      this.props.setCreateCatOpen(false);
+    }
+  }
+
   render() {
-    const { createCatOpen, setCreateCatOpen } = this.props;
+    const {
+      createCatOpen,
+      setCreateCatOpen,
+      createdCategory,
+      createCategoryError,
+      createCategoryLoader
+    } = this.props;
     const { name } = this.state;
+
     return (
       <Dialog
         open={createCatOpen}
@@ -42,7 +53,7 @@ class CreateCategoryModal extends Component {
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">Category</DialogTitle>
-        
+
         <DialogContent>
           <TextField
             autoFocus
@@ -59,8 +70,15 @@ class CreateCategoryModal extends Component {
           <Button onClick={() => setCreateCatOpen(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={this.createCategory} color="primary">
-            Submit
+          <Button
+            disabled={createCategoryLoader}
+            onClick={() => {
+              this.createCategory();
+              // setCreateCatOpen(false);
+            }}
+            color="primary"
+          >
+            {createCategoryLoader ? (<ReactLoading type={'bars'} color={'#0097A7'} height={'20px'} width={'20pxy'} />) : "Submit"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -68,18 +86,28 @@ class CreateCategoryModal extends Component {
   }
 }
 
-const mapStateToProps = (state) => {
-    // const {categoryReducer: {createdCategory, createdCategoryError, createdCategoryLoader}} = state
-    return{
-        // createdCategory, createdCategoryError, createdCategoryLoader
-        // createdCategory: state.createdCategory
+const mapStateToProps = state => {
+  const {
+    categoryReducer: {
+      createdCategory,
+      createCategoryError,
+      createCategoryLoader
     }
-}
+  } = state;
+  return {
+    createdCategory,
+    createCategoryError,
+    createCategoryLoader
+  };
+};
 
-const mapDispatchToProps = (dispatch) => {
-    return {
-        createCategory: (category) => dispatch(categoryAction.createCategory(category))
-    }
-}
+const mapDispatchToProps = dispatch => {
+  return {
+    createCategory: category => dispatch(categoryAction.createCategory(category))
+  };
+};
 
-export default connect(mapStateToProps,mapDispatchToProps)(CreateCategoryModal);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(CreateCategoryModal);

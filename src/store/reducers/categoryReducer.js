@@ -14,7 +14,9 @@ const initialState = {
 
   categories: null,
   getCategoriesError: null,
-  getCategoriesLoader: false
+  getCategoriesLoader: false,
+
+  categoriesHistory: []
 };
 
 export default function categoryReducer(state = initialState, action) {
@@ -49,9 +51,9 @@ export default function categoryReducer(state = initialState, action) {
         getCategoriesError: null
       };
     case GET_CATEGORIES_SUCCESS:
-      debugger;
       return {
         ...state,
+        categoriesHistory: action,
         categories: action.payload,
         getCategoriesLoader: false,
         getCategoriesError: null

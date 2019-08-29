@@ -5,49 +5,37 @@ import { categoryAction } from "../actions/categoryAction";
 
 export default class categoryEpic {
   static createCategory = action$ =>
-    action$.ofType(CREATE_CATEG0RY).mergeMap(({ payload }) => {
+    action$.ofType(CREATE_CATEG0RY).switchMap(({ payload }) => {
       return Observable.fromPromise(
         db
           .collection("categories")
-          .doc(`${payload.category_id}`)
+          .doc()
           .set(payload)
       )
-        .catch(error => {
-          console.error("Error writing document: ", error);
-          return categoryAction.createCategoryFailure(
-            `Error in Creating Category! ${error}`
+        .switchMap(() => {
+          return Observable.of(
+            categoryAction.createCategorySuccess(payload),
+            categoryAction.getCategories()
+            )
+        })
+        .catch(err => {
+          return categoryAction.getCategoriesFailure(
+            `Error in getting Categroies! ${err}`
           );
-        })
-        .map(err => {
-          console.log("Document successfully written!", err);
-          return categoryAction.createCategorySuccess("successfully");
-        })
-        .switchMap(response => {
-          if (response.type === "CREATE_CATEGORY_SUCCESS") {
-            return Observable.of(
-              categoryAction.createCategorySuccess(payload),
-              categoryAction.getCategories()
-            );
-          } else {
-            return Observable.of(
-              categoryAction.createCategoryFailure(
-                `Error in Creating Company! ${response.payload}`
-              )
-            );
-          }
         });
     });
 
   static getCategories = action$ =>
-    action$.ofType(GET_CATEGORIES).mergeMap(({ }) => {
+    action$.ofType(GET_CATEGORIES).mergeMap(({payload}) => {
       return db
         .collection("categories")
+        // .where("pId", "==", payload ? payload.pId: "None")
         .get()
         .then(querySnapshot => {
           let categories = [];
           querySnapshot.forEach(doc => {
             console.log(doc.id, " => ", doc.data());
-            categories.push(doc.data());
+            categories.push({ ...doc.data(), id: doc.id});
           });
           return categoryAction.getCategoriesSuccess(categories);
         })
